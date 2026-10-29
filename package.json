@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "test:db": "bash supabase/tests/run-local.sh",
-    "db:bundle": "bash scripts/bundle-migrations.sh"
+    "db:bundle": "bash scripts/bundle-migrations.sh",
+    "env:local": "bash scripts/env-from-environment.sh"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
