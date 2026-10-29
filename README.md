@@ -13,7 +13,7 @@ De belangrijkste afspraak: **de AI rekent nooit.** De AI begrijpt wat de schilde
 | 0 | Opzet: project, database (ook opvolging en meten), design, README | ✅ Klaar |
 | 1 | Rekenmodule en herinneringsplanning met tests | ✅ Klaar |
 | 2 | Instellingen (bedrijf, tarieven, normen, materialen, opvolging) | ✅ Klaar en live getest |
-| 3 | AI-verwerking (tekst, spraak, werkomschrijving) | ⏳ |
+| 3 | AI-verwerking (tekst, spraak, werkomschrijving) | 🟡 Tekst en werkomschrijving gebouwd; evals draaien zodra de AI-sleutel er is; spraak volgt |
 | 4 | Controleren en pdf | ⏳ |
 | 5 | Delen, bekijk-melding, akkoord of afwijzen | ⏳ |
 | 6 | Opvolging en meten: herinneringen, dashboard | ⏳ |
@@ -46,6 +46,7 @@ Zonder Supabase werkt de app ook. Je ziet dan een oranje melding dat de database
 | `npm run dev` | Start de app op je computer |
 | `npm test` | Draait alle tests (rekenwerk en opmaak) |
 | `npm run test:db` | Test de database en of gebruikers elkaars gegevens echt niet kunnen zien. Hiervoor moet PostgreSQL op je computer staan. |
+| `npm run evals` | Test de AI met 11 voorbeelden (kost een paar cent, `ANTHROPIC_API_KEY` nodig) |
 | `npm run typecheck` | Controleert of de TypeScript-code klopt |
 | `npm run lint` | Controleert de code op veelgemaakte fouten |
 
@@ -74,7 +75,7 @@ src/
   components/ui/    Herbruikbare bouwstenen: knoppen, lijsten, tabbalk
   lib/
     calc/           De rekenmodule: alle berekeningen en btw (zie de README daar)
-    ai/             AI-verwerking, alleen op de server (fase 3)
+    ai/             AI-verwerking, alleen op de server: vast formaat, werkomschrijving, controles
     settings/       Instellingen controleren en omzetten (bijv. "€ 45,50" → 4550 cent)
     auth/           Wie is er ingelogd?
     supabase/       Verbinding met de database
@@ -95,4 +96,7 @@ evals/              Testvoorbeelden voor de AI (fase 3)
 - **Row Level Security (RLS)** is een slot op elke databasetabel: een schilder kan alleen zijn eigen klanten, offertes en prijzen zien, ook als iemand de app probeert te omzeilen. `npm run test:db` bewijst dat.
 - **Herinneringen worden nooit dubbel verstuurd.** De planning ("moet er nu een herinnering uit?") is een geteste functie in `src/lib/calc/followUp.ts`. In de database kan elke herinnering maar één keer bestaan; de server legt hem eerst vast en verstuurt pas daarna.
 - **Bekijken meten zonder tracking.** We zien alleen dat iemand onze eigen offertepagina opent. Geen trackingpixels in e-mails, geen cookies van anderen, geen IP-adressen.
+- **De AI rekent nooit.** Claude zet wat je zegt om in een vast formaat (bijvoorbeeld "lengte 4, breedte 5, hoogte ontbreekt"). Wat je niet zegt, blijft leeg; de app vraagt er later naar. Daarna rekent de app zelf, met jouw instellingen.
+- **Werkomschrijving met controle.** De AI schrijft per ruimte een korte tekst. De app controleert die tekst: staat er een bedrag, uren, een belofte of een getal in dat niet in de gegevens staat, dan wordt een eenvoudige standaardtekst gebruikt.
+- **AI-kosten en limiet.** Elke AI-aanroep wordt met kosten opgeslagen (tabel `ai_calls`). Per gebruiker zijn er maximaal `AI_CALLS_PER_USER_PER_DAY` aanroepen per 24 uur (standaard 50).
 - **Btw-tarieven staan in de database** (tabel `vat_rates`), niet in de code. Verandert de wet, dan pas je alleen die tabel aan.

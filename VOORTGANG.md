@@ -9,7 +9,7 @@ Dit bestand houdt bij waar we zijn, zodat een nieuwe sessie direct verder kan. L
 | 0 – Opzet, database, design | Klaar |
 | 1 – Rekenmodule en herinneringsplanning | Klaar (tests slagen) |
 | 2 – Inloggen en instellingen | Klaar en live getest op het echte Supabase-project |
-| 3 – AI-verwerking | Nog niet begonnen |
+| 3 – AI-verwerking | Tekstinvoer, werkomschrijving, evals (11 cases) en scherm gebouwd. Nog te doen: evals draaien met echte sleutel, migratie 0006 uitvoeren, spraak (dienst kiezen) |
 | 4 t/m 7 | Nog niet begonnen |
 
 ## Supabase
@@ -42,7 +42,12 @@ Getest met twee testgebruikers op het echte project (aangemaakt met e-mail + wac
 
 Na de test: "Confirm email" weer aanzetten en de testgebruikers `test-a.offerte-mvp@example.com` en `test-b.offerte-mvp@example.com` verwijderen (hun gegevens verdwijnen dan automatisch mee).
 
-Daarna: fase 3 (AI-verwerking). Vraag eerst akkoord voor de spraak-naar-tekstdienst (betaald, CLAUDE.md regel 9).
+## Fase 3: stand van zaken
+
+- Model: `claude-opus-5-5` via structured outputs (`client.beta.messages.parse` + `zodOutputFormat`), met server-side fallback bij een weigering. Kosten worden per aanroep gelogd in `ai_calls`.
+- Migratie `20261029000006_ai_calls_insert.sql` moet nog in Supabase uitgevoerd worden (gebruikers mogen eigen AI-aanroepen loggen; soort "describe").
+- `npm run evals` draait 11 cases en de werkomschrijving-check. In de cloudcontainer: `NODE_USE_ENV_PROXY=1 npm run evals`.
+- Nog niet gedaan: offerte opslaan (fase 4), ontbrekende gegevens in de app aanvullen (fase 4), spraak-naar-tekst (eerst dienst kiezen met Tom, CLAUDE.md regel 9).
 
 ## Afspraken met Tom
 

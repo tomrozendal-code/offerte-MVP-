@@ -83,8 +83,8 @@ do $$ begin
   exception when insufficient_privilege then null;
   end;
   begin
-    insert into public.ai_calls (user_id, provider, model, purpose) values ('22222222-2222-2222-2222-222222222222', 'x', 'x', 'structure');
-    raise exception 'users must not write ai_calls';
+    insert into public.ai_calls (user_id, provider, model, purpose) values ('11111111-1111-1111-1111-111111111111', 'x', 'x', 'structure');
+    raise exception 'users must not log AI calls for someone else';
   exception when insufficient_privilege then null;
   end;
   begin
@@ -94,6 +94,17 @@ do $$ begin
     end if;
   end;
 end $$;
+
+-- Bram logs his own AI call but can never remove it (the daily limit counts these rows).
+insert into public.ai_calls (user_id, provider, model, purpose) values ('22222222-2222-2222-2222-222222222222', 'anthropic', 'x', 'structure');
+delete from public.ai_calls;
+update public.ai_calls set cost_microcents = 0;
+reset role;
+do $$ begin
+  assert (select count(*) from public.ai_calls) = 1, 'AI call rows must not be deletable by users';
+end $$;
+set role authenticated;
+set request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
 
 -- Anonymous visitors see nothing.
 set role anon;
