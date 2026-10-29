@@ -2,14 +2,17 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 
-// Refreshes the Supabase login session on every request.
-// Login redirects are added in phase 2, once magic-link login exists.
+// Pages anyone may open without logging in.
+const PUBLIC_PATHS = ["/login", "/auth", "/design"];
+
+// Refreshes the Supabase login session on every request and sends visitors who are
+// not logged in to the login page.
 export async function proxy(request: NextRequest) {
   const config = getSupabaseConfig();
   if (!config) return NextResponse.next();
 
   let response = NextResponse.next({ request });
-  const supabase = createServerClient(config.url, config.anonKey, {
+  const supabase = createServerClient(config.url, config.publishableKey, {
     cookies: {
       getAll: () => request.cookies.getAll(),
       setAll: (cookiesToSet) => {
@@ -19,7 +22,15 @@ export async function proxy(request: NextRequest) {
       },
     },
   });
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const path = request.nextUrl.pathname;
+  const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
+  if (!user && !isPublic) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
   return response;
 }
 

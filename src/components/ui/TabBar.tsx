@@ -13,6 +13,7 @@ const tabs = [
 /** Bottom tab bar: large tap targets for one-handed use. */
 export function TabBar() {
   const pathname = usePathname();
+  if (pathname === "/login" || pathname.startsWith("/auth")) return null;
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-separator bg-bar pb-[env(safe-area-inset-bottom)] backdrop-blur-xl backdrop-saturate-150">

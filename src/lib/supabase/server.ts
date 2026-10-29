@@ -9,7 +9,7 @@ export async function createClient() {
   if (!config) throw new Error("Supabase is not configured. See README, step 'Supabase koppelen'.");
   const cookieStore = await cookies();
 
-  return createServerClient(config.url, config.anonKey, {
+  return createServerClient(config.url, config.publishableKey, {
     cookies: {
       getAll: () => cookieStore.getAll(),
       setAll: (cookiesToSet) => {

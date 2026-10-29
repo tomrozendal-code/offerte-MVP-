@@ -83,3 +83,11 @@ export function PercentIcon({ className = "size-[18px]" }: IconProps) {
     </svg>
   );
 }
+
+export function BellIcon({ className = "size-[18px]" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path {...stroke} d="M18 16v-5a6 6 0 0 0-12 0v5l-2 2h16zM10 21h4" />
+    </svg>
+  );
+}

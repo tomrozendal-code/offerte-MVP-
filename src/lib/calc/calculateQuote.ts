@@ -3,6 +3,7 @@ import { ceilingArea, wallArea } from "./area";
 import { checkCount, checkMeasure, missing } from "./checks";
 import { euro, fmt, plural } from "./explain";
 import { type Fraction, add, ceil, div, frac, fromDecimal, mul, roundHalfUp } from "./fraction";
+import { NORM_LABELS, UNIT_LABELS } from "./norms";
 import { laborVatParts, materialVatParts, missingVatRates, vatBreakdown, type VatPart } from "./vat";
 import type {
   CalcLine,
@@ -31,26 +32,6 @@ export type CalculateQuoteInput = {
   vatConfig: VatConfig;
   /** ISO date (yyyy-mm-dd) of the quote; determines which VAT rates apply. */
   quoteDate: string;
-};
-
-export const NORM_LABELS: Record<NormKey, string> = {
-  wall_paint: "Muur sauzen",
-  ceiling_paint: "Plafond sauzen",
-  preparation: "Voorbereiding",
-  peeling_prep: "Extra voorbereiding bij bladderende verf",
-  crack_repair: "Scheuren repareren",
-  door_paint: "Deur lakken",
-  door_peeling_prep: "Extra voorbereiding deuren bij bladderende verf",
-  frame_paint: "Kozijn lakken",
-  skirting_paint: "Plinten",
-};
-
-const UNIT_LABELS: Record<NormUnit, string> = {
-  m2_per_hour_per_coat: "m²/uur",
-  minutes_per_m2: "min/m²",
-  hours_per_meter: "uur/m",
-  hours_per_piece: "uur/stuk",
-  hours_per_piece_per_side: "uur per stuk per kant",
 };
 
 type MaterialUse = { label: string; area: Fraction; coats: number };

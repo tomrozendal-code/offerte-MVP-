@@ -12,7 +12,7 @@ De belangrijkste afspraak: **de AI rekent nooit.** De AI begrijpt wat de schilde
 | --- | --- | --- |
 | 0 | Opzet: project, database (ook opvolging en meten), design, README | ✅ Klaar |
 | 1 | Rekenmodule en herinneringsplanning met tests | ✅ Klaar |
-| 2 | Instellingen (bedrijf, tarieven, normen, materialen, opvolging) | ⏳ |
+| 2 | Instellingen (bedrijf, tarieven, normen, materialen, opvolging) | ✅ Gebouwd (nog live testen met Supabase) |
 | 3 | AI-verwerking (tekst, spraak, werkomschrijving) | ⏳ |
 | 4 | Controleren en pdf | ⏳ |
 | 5 | Delen, bekijk-melding, akkoord of afwijzen | ⏳ |
@@ -56,8 +56,8 @@ Supabase is de database, de login en de opslag voor bestanden. Je hebt het pas e
 1. Maak een gratis account op [supabase.com](https://supabase.com).
 2. Maak een nieuw project. **Kies als regio een EU-regio, bijvoorbeeld Frankfurt** (dit is nodig voor de AVG).
 3. Ga naar **SQL Editor** → **New query**, plak de inhoud van `supabase/setup-alles.sql` en klik op **Run**. Dit bestand bevat alle bestanden uit `supabase/migrations/` achter elkaar (maak het opnieuw met `npm run db:bundle`).
-4. Ga naar **Project Settings → API** en kopieer de **Project URL** en de **anon key** naar `.env.local`.
-5. Zet bij **Authentication → URL Configuration** de Site URL op `http://localhost:3000`.
+4. Klik in Supabase op **Connect** en kopieer de **Project URL** en de **Publishable key** (begint met `sb_publishable_`) naar `.env.local`. Stuur nooit de secret key of het databasewachtwoord naar iemand.
+5. Zet bij **Authentication → URL Configuration** de **Site URL** op `http://localhost:3000` en voeg bij **Redirect URLs** toe: `http://localhost:3000/auth/confirm`.
 6. Start de app opnieuw met `npm run dev`. De oranje melding is dan weg.
 
 ## Hoe het in elkaar zit
@@ -67,12 +67,16 @@ src/
   app/              De schermen (elke map is een pagina)
     page.tsx        Offertes (startscherm)
     nieuw/          Nieuwe offerte (inspreken komt in fase 3)
-    instellingen/   Instellingen
+    login/          Inloggen met een link in je mail (geen wachtwoord)
+    auth/confirm/   Hier komt de link uit de mail binnen
+    instellingen/   Instellingen: bedrijf, tarieven, normen, materialen, btw, opvolging
     design/         Overzicht van alle design-onderdelen
   components/ui/    Herbruikbare bouwstenen: knoppen, lijsten, tabbalk
   lib/
     calc/           De rekenmodule: alle berekeningen en btw (zie de README daar)
     ai/             AI-verwerking, alleen op de server (fase 3)
+    settings/       Instellingen controleren en omzetten (bijv. "€ 45,50" → 4550 cent)
+    auth/           Wie is er ingelogd?
     supabase/       Verbinding met de database
     format.ts       Bedragen en getallen netjes in het Nederlands tonen
   proxy.ts          Houdt de login actief bij elke paginaweergave

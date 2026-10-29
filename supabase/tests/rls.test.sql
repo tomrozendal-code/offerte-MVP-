@@ -8,6 +8,8 @@ insert into auth.users (id, email) values
 -- The signup trigger created a profile for each user.
 do $$ begin
   assert (select count(*) from public.profiles) = 2, 'signup trigger should create profiles';
+  assert (select email from public.profiles where user_id = '11111111-1111-1111-1111-111111111111') = 'anna@example.test',
+    'signup trigger should copy the login e-mail';
 end $$;
 
 -- Anna creates data.
