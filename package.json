@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "test:db": "bash supabase/tests/run-local.sh"
+    "test:db": "bash supabase/tests/run-local.sh",
+    "db:bundle": "bash scripts/bundle-migrations.sh"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

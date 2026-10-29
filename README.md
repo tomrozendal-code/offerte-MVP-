@@ -55,7 +55,7 @@ Supabase is de database, de login en de opslag voor bestanden. Je hebt het pas e
 
 1. Maak een gratis account op [supabase.com](https://supabase.com).
 2. Maak een nieuw project. **Kies als regio een EU-regio, bijvoorbeeld Frankfurt** (dit is nodig voor de AVG).
-3. Ga naar **SQL Editor** en voer de bestanden in `supabase/migrations/` één voor één uit, in volgorde van de naam.
+3. Ga naar **SQL Editor** → **New query**, plak de inhoud van `supabase/setup-alles.sql` en klik op **Run**. Dit bestand bevat alle bestanden uit `supabase/migrations/` achter elkaar (maak het opnieuw met `npm run db:bundle`).
 4. Ga naar **Project Settings → API** en kopieer de **Project URL** en de **anon key** naar `.env.local`.
 5. Zet bij **Authentication → URL Configuration** de Site URL op `http://localhost:3000`.
 6. Start de app opnieuw met `npm run dev`. De oranje melding is dan weg.
