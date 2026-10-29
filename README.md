@@ -10,13 +10,14 @@ De belangrijkste afspraak: **de AI rekent nooit.** De AI begrijpt wat de schilde
 
 | Fase | Wat | Status |
 | --- | --- | --- |
-| 0 | Opzet: project, database, design, README | ✅ Klaar |
-| 1 | Rekenmodule met tests | ✅ Klaar |
-| 2 | Instellingen (bedrijf, tarieven, normen, materialen) | ⏳ |
-| 3 | AI-verwerking (tekst, daarna spraak) | ⏳ |
+| 0 | Opzet: project, database (ook opvolging en meten), design, README | ✅ Klaar |
+| 1 | Rekenmodule en herinneringsplanning met tests | ✅ Klaar |
+| 2 | Instellingen (bedrijf, tarieven, normen, materialen, opvolging) | ⏳ |
+| 3 | AI-verwerking (tekst, spraak, werkomschrijving) | ⏳ |
 | 4 | Controleren en pdf | ⏳ |
-| 5 | Delen en akkoord | ⏳ |
-| 6 | Afronden (PWA, beveiliging, privacy) | ⏳ |
+| 5 | Delen, bekijk-melding, akkoord of afwijzen | ⏳ |
+| 6 | Opvolging en meten: herinneringen, dashboard | ⏳ |
+| 7 | Afronden (PWA, beveiliging, privacy) | ⏳ |
 
 ## Lokaal draaien
 
@@ -88,4 +89,6 @@ evals/              Testvoorbeelden voor de AI (fase 3)
 - **Design in Apple-stijl.** De kleuren, lettertypes en onderdelen volgen de richtlijnen van Apple (Human Interface Guidelines): grijze achtergrond met witte kaarten, grote titels, een tabbalk onderin en grote knoppen (minstens 50 pixels hoog) die je makkelijk met één duim raakt. Op iPhone gebruikt de app het Apple-lettertype San Francisco, op andere toestellen Inter. Donkere modus gaat automatisch mee met je telefoon. Alle kleuren staan op één plek: `src/app/globals.css`. Bekijk alle onderdelen op `/design`.
 - **Geld in centen.** We rekenen met hele centen (4500 in plaats van 45,00). Zo krijg je geen afrondingsfoutjes. Pas bij het tonen maken we er euro's van.
 - **Row Level Security (RLS)** is een slot op elke databasetabel: een schilder kan alleen zijn eigen klanten, offertes en prijzen zien, ook als iemand de app probeert te omzeilen. `npm run test:db` bewijst dat.
+- **Herinneringen worden nooit dubbel verstuurd.** De planning ("moet er nu een herinnering uit?") is een geteste functie in `src/lib/calc/followUp.ts`. In de database kan elke herinnering maar één keer bestaan; de server legt hem eerst vast en verstuurt pas daarna.
+- **Bekijken meten zonder tracking.** We zien alleen dat iemand onze eigen offertepagina opent. Geen trackingpixels in e-mails, geen cookies van anderen, geen IP-adressen.
 - **Btw-tarieven staan in de database** (tabel `vat_rates`), niet in de code. Verandert de wet, dan pas je alleen die tabel aan.

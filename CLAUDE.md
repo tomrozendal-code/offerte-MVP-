@@ -107,3 +107,74 @@ Voorbeeldinstellingen: uurtarief € 45, opslag materiaal 15%, voorrijkosten €
 - De AI-verwerking doet minstens 9 van de 10 evals goed.
 - Er staan geen geheimen in de browsercode en RLS is getest.
 - De README legt in eenvoudig Nederlands uit hoe alles werkt en hoe ik het draai.
+
+## 11. Aanvulling: meer klussen winnen (melding, herinnering, werkomschrijving, meten)
+
+Deze aanvulling gaat vóór eerdere hoofdstukken als ze elkaar tegenspreken. Alles hieronder hoort bij de MVP.
+
+### Waarom
+
+Handoff (VS) verkoopt zich vooral met "win meer klussen": een nette offerte die snel bij de klant ligt, een melding als de klant de offerte bekijkt, en opvolging. Snelheid alleen is niet genoeg; de app moet de vakman ook helpen de opdracht binnen te halen.
+
+### 11.1 Melding als de klant de offerte bekijkt
+
+- Zodra de klant de offertelink voor het eerst opent, krijgt de vakman direct een melding: "[Klantnaam] bekijkt nu je offerte voor [adres]. Goed moment om te bellen." met een knop om de klant te bellen.
+- Gebruik web-pushmeldingen (PWA), met e-mail als terugval als push niet is toegestaan. Leg de vakman in de app uit dat push op een iPhone alleen werkt als de app op het beginscherm staat.
+- Leg vast: eerste keer bekeken, laatste keer bekeken en hoe vaak.
+- Bij latere bezoeken alleen opnieuw een melding als de offerte langer dan 24 uur niet bekeken is. Bezoeken van de vakman zelf tellen niet mee.
+- Meet het bekijken alleen via onze eigen offertepagina: geen trackingpixels in e-mails, geen cookies van derden. Vermeld dit in de privacyverklaring.
+- Deellinks gebruiken een lang, onraadbaar token en tonen alleen die ene offerte.
+
+### 11.2 Automatische herinnering
+
+- Geen akkoord na het ingestelde aantal dagen (standaard dag 3 en dag 7):
+  - de app stuurt automatisch een vriendelijke herinneringsmail namens de vakman (afzendernaam = bedrijfsnaam, antwoordadres = e-mail van de vakman), met de offertelink;
+  - heeft de klant alleen een mobiel nummer, dan krijgt de vakman een melding met een kant-en-klaar WhatsApp-bericht dat hij met één tik verstuurt. Automatisch WhatsApp-berichten versturen (WhatsApp Business API) zit niet in de MVP.
+- Maximaal twee herinneringen, en nooit na de vervaldatum.
+- Direct stoppen bij akkoord, afwijzing, verlopen, of als de vakman de offerte op "gewonnen" of "verloren" zet.
+- De vakman ziet per offerte wanneer de volgende herinnering gepland staat en kan die overslaan of uitzetten.
+- Instellingen (nieuw scherm "Opvolging"): meldingen aan/uit (push en/of e-mail), herinneringen aan/uit, na hoeveel dagen, en een eigen herinneringstekst (met een goede standaardtekst).
+- Geen spam: herinneringen gaan alleen naar klanten die een offerte van deze vakman hebben gekregen.
+- Techniek: de planning ("wel/niet versturen en wanneer de volgende") is een pure, geteste functie in de rekenmodule. Een cronjob (bijv. Supabase pg_cron of Vercel Cron) draait die elk kwartier. Een herinnering mag nooit twee keer verstuurd worden (idempotent).
+- E-mail via een transactionele e-maildienst met EU-verwerking en verwerkersovereenkomst; SPF/DKIM instellen. Vraag mij eerst welke dienst.
+
+### 11.3 Akkoord of afwijzen
+
+- De klant kan op de link akkoord geven (naam, vinkje, tijdstip vastleggen) of afwijzen met een optionele reden. De vakman krijgt bij beide direct een melding.
+- Statussen worden: concept, verstuurd, bekeken, herinnerd, akkoord, afgewezen, verlopen.
+
+### 11.4 Werkomschrijving door de AI
+
+- Na het berekenen schrijft de AI op basis van de gestructureerde gegevens een korte, professionele omschrijving van het werk per ruimte (wat er gebeurt, voorbereiding, aantal lagen, soort verf), in de "wij/ik"-vorm van de vakman, in helder Nederlands.
+- Regels: geen bedragen, geen hoeveelheden of maten die niet in de gegevens staan, geen beloftes over garanties of planning. De vakman kan de tekst aanpassen.
+- De AI mag dus teksten schrijven, maar rekent nog steeds nooit.
+
+### 11.5 Meten: tijdwinst en gewonnen klussen
+
+- Leg per offerte vast: tijdstip gestart, eerste AI-voorstel klaar, verstuurd; de actieve tijd tot versturen (pauzes langer dan 5 minuten niet meetellen); eerst bekeken, aantal keer bekeken, verstuurde herinneringen, tijdstip akkoord of afwijzing; aantal aanpassingen op het AI-voorstel.
+- Dashboard voor de vakman: aantal offertes deze maand, gemiddelde tijd per offerte, percentage bekeken, percentage akkoord, en hoeveel akkoorden kwamen na een herinnering.
+- Voor mij (beheerder): een CSV-export van deze cijfers over alle gebruikers, zonder klantgegevens.
+
+### 11.6 Aanpassing van de fases
+
+- Fase 0: voeg tabellen toe voor bekijk-gebeurtenissen, herinneringen en meetgegevens (met RLS).
+- Fase 1: voeg de herinneringsplanning toe aan de rekenmodule, met tests.
+- Fase 2: voeg het instellingenscherm "Opvolging" toe.
+- Fase 3: voeg de werkomschrijving toe; controleer in de evals dat die geen bedragen of verzonnen hoeveelheden bevat.
+- Fase 5: voeg de melding bij bekijken en akkoord/afwijzen toe.
+- Nieuwe fase 6 – Opvolging en meten: herinneringen (cronjob, e-mail, WhatsApp-klaarzetbericht), meetgegevens en dashboard.
+- De oude fase 6 (Afronden) wordt fase 7; voeg toe: test dat een deellink alleen die ene offerte toont.
+
+### 11.7 Extra testcases (herinneringen na 3 en 7 dagen, geldigheid 30 dagen)
+
+6. Offerte verstuurd op dag 0, geen reactie. Verwacht: herinnering op dag 3 en dag 7, daarna niets meer. Akkoord op dag 4: de herinnering van dag 7 vervalt.
+7. Geldigheid 5 dagen. Verwacht: herinnering op dag 3, géén herinnering op dag 7.
+8. Vakman zet herinneringen uit voor deze offerte. Verwacht: niets verstuurd.
+9. Klant opent op dag 1 om 10:00 en 10:05, en op dag 3. Verwacht: melding op dag 1 om 10:00 en op dag 3, niet om 10:05. De vakman die zijn eigen link opent, telt niet mee.
+10. Werkomschrijving bij testcase 1: geen eurobedragen, en geen andere maten dan 43,2 m² muren en 20 m² plafond.
+
+### 11.8 Extra "klaar als"
+
+- De vakman krijgt binnen een minuut een melding als de klant de offerte opent.
+- Herinneringen worden op de juiste dagen verstuurd, nooit dubbel, en stoppen bij reactie (testcases 6–9 slagen).
+- Het dashboard toont de gemiddelde tijd per offerte en het percentage akkoord.

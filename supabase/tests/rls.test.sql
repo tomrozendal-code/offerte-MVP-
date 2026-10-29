@@ -19,6 +19,28 @@ insert into public.quote_lines (quote_id, kind, description, amount_cents, vat_r
   values ('aaaaaaaa-0000-0000-0000-000000000001', 'labor', 'Muren sauzen', 21600, 900, '4,8 uur × € 45');
 insert into public.materials (name, unit, package_size, purchase_price_cents) values ('Muurverf', 'liter', 10, 6000);
 update public.profiles set company_name = 'Schildersbedrijf Anna';
+insert into public.quote_metrics (quote_id) values ('aaaaaaaa-0000-0000-0000-000000000001');
+insert into public.push_subscriptions (endpoint, p256dh, auth) values ('https://push.example/anna', 'k', 'a');
+insert into public.quote_reminders (quote_id, reminder_index, status) values ('aaaaaaaa-0000-0000-0000-000000000001', 1, 'skipped');
+
+-- Anna may skip a reminder, but not mark one as sent (only the server sends).
+do $$ begin
+  begin
+    insert into public.quote_reminders (quote_id, reminder_index, status) values ('aaaaaaaa-0000-0000-0000-000000000001', 0, 'sent');
+    raise exception 'users must not mark reminders as sent';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    insert into public.quote_views (quote_id, user_id) values ('aaaaaaaa-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111');
+    raise exception 'users must not write view events';
+  exception when insufficient_privilege then null;
+  end;
+end $$;
+
+-- The server records a client view.
+reset role;
+insert into public.quote_views (quote_id, user_id, notified) values ('aaaaaaaa-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', true);
+set role authenticated;
 
 -- Bram sees nothing of Anna.
 set request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
@@ -29,6 +51,10 @@ do $$ begin
   assert (select count(*) from public.materials) = 0, 'Bram must not see Anna''s materials';
   assert (select count(*) from public.profiles) = 1, 'Bram only sees his own profile';
   assert (select count(*) from public.vat_rates) = 2, 'VAT rates are readable';
+  assert (select count(*) from public.quote_views) = 0, 'Bram must not see Anna''s views';
+  assert (select count(*) from public.quote_reminders) = 0, 'Bram must not see Anna''s reminders';
+  assert (select count(*) from public.quote_metrics) = 0, 'Bram must not see Anna''s metrics';
+  assert (select count(*) from public.push_subscriptions) = 0, 'Bram must not see Anna''s push subscriptions';
 end $$;
 
 -- Bram cannot change Anna's data (updates silently affect 0 rows).
@@ -46,6 +72,12 @@ do $$ begin
   begin
     insert into public.clients (user_id, name) values ('11111111-1111-1111-1111-111111111111', 'Nep');
     raise exception 'insert as other user should fail';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    insert into public.quote_reminders (quote_id, user_id, reminder_index, status)
+      values ('aaaaaaaa-0000-0000-0000-000000000001', '22222222-2222-2222-2222-222222222222', 0, 'skipped');
+    raise exception 'skipping a reminder of someone else''s quote should fail';
   exception when insufficient_privilege then null;
   end;
   begin
@@ -73,6 +105,7 @@ end $$;
 reset role;
 do $$ begin
   assert (select status from public.quotes) = 'draft', 'Anna''s quote must be unchanged';
+  assert (select count(*) from public.quote_views) = 1, 'Anna''s view must be unchanged';
   assert (select company_name from public.profiles where user_id = '11111111-1111-1111-1111-111111111111') = 'Schildersbedrijf Anna', 'Anna''s profile must be unchanged';
   assert (select rate_bp from public.vat_rates where code = 'reduced') = 900, 'VAT rate must be unchanged';
 end $$;

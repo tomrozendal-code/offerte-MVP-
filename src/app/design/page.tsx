@@ -24,7 +24,9 @@ export default function DesignPage() {
           <StatusBadge status="draft" />
           <StatusBadge status="sent" />
           <StatusBadge status="viewed" />
+          <StatusBadge status="reminded" />
           <StatusBadge status="accepted" />
+          <StatusBadge status="rejected" />
           <StatusBadge status="expired" />
         </div>
       </ListGroup>
@@ -32,6 +34,7 @@ export default function DesignPage() {
       <ListGroup header="Offertelijst">
         <ListRow title="Fam. de Vries" subtitle="Woonkamer en hal · Utrecht" value={<StatusBadge status="accepted" />} href="/design" />
         <ListRow title="Bakkerij Jansen" subtitle="Winkelruimte · Amersfoort" value={<StatusBadge status="viewed" />} href="/design" />
+        <ListRow title="Fam. Bos" subtitle="Hal en trap · Houten" value={<StatusBadge status="reminded" />} href="/design" />
         <ListRow title="M. Yilmaz" subtitle="Slaapkamer · Zeist" value={<StatusBadge status="draft" />} href="/design" />
       </ListGroup>
 

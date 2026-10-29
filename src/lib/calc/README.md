@@ -53,6 +53,17 @@ Intern rekent alles met exacte breuken (`fraction.ts`), dus er ontstaan geen kom
 - Materialen: zoals de schilder heeft ingesteld (zelfde als arbeid, of altijd 21%).
 - Tarieven en ingangsdata komen uit de database, niet uit de code.
 
+## Opvolging (`followUp.ts`)
+
+- `planReminder` beslist of er nu een herinnering uit moet, en anders wanneer de volgende gepland staat.
+  Maximaal twee, nooit na de vervaldatum, en direct stoppen bij akkoord, afwijzing, verlopen of
+  "gewonnen/verloren". Heeft de klant geen e-mail maar wel een telefoonnummer, dan krijgt de vakman een
+  klaargezet WhatsApp-bericht. Was de server een tijd uit, dan gaat alleen de laatste herinnering die
+  al had gemoeten, zodat de klant nooit twee tegelijk krijgt.
+- `decideViewNotification` beslist of de vakman een melding krijgt als de offerte bekeken wordt: bij de
+  eerste keer, en daarna alleen als er langer dan 24 uur niet gekeken is. De vakman zelf telt niet mee.
+- "Dag 3" betekent precies 3 × 24 uur na het versturen.
+
 ## Bekende beperkingen (later oppakken)
 
 - Materiaal voor deuren, kozijnen en plinten wordt nog niet berekend (er komt een waarschuwing).

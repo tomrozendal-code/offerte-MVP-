@@ -1,11 +1,13 @@
-export type QuoteStatus = "draft" | "sent" | "viewed" | "accepted" | "expired";
+export type QuoteStatus = "draft" | "sent" | "viewed" | "reminded" | "accepted" | "rejected" | "expired";
 
 const statusStyle: Record<QuoteStatus, { label: string; className: string }> = {
   draft: { label: "Concept", className: "bg-fill text-label-2" },
   sent: { label: "Verstuurd", className: "bg-tint-soft text-tint" },
   viewed: { label: "Bekeken", className: "bg-orange/15 text-orange" },
+  reminded: { label: "Herinnerd", className: "bg-[#af52de]/15 text-[#af52de]" },
   accepted: { label: "Akkoord", className: "bg-green/15 text-green" },
-  expired: { label: "Verlopen", className: "bg-red/12 text-red" },
+  rejected: { label: "Afgewezen", className: "bg-red/12 text-red" },
+  expired: { label: "Verlopen", className: "bg-fill text-label-3" },
 };
 
 export function StatusBadge({ status }: { status: QuoteStatus }) {
