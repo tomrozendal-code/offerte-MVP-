@@ -30,7 +30,7 @@ export function MaterialForm({ material }: { material: MaterialRow | null }) {
         {material && <input type="hidden" name="id" value={material.id} />}
         {material && <input type="hidden" name="originalPriceCents" value={material.purchase_price_cents} />}
         {material?.is_example_price && (
-          <p className="text-subhead rounded-2xl bg-orange/12 px-4 py-3">
+          <p className="text-subhead rounded-card border-l-[3px] border-orange bg-orange/10 px-4 py-3">
             <strong className="font-semibold">{EXAMPLE_PRICE_LABEL}.</strong> Zodra je de prijs wijzigt, is het jouw eigen prijs.
           </p>
         )}

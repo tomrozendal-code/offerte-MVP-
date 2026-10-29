@@ -23,14 +23,14 @@ export default async function MaterialsPage() {
       }
     >
       {examples > 0 && (
-        <p className="text-subhead rounded-2xl bg-orange/12 px-4 py-3">
+        <p className="text-subhead rounded-card border-l-[3px] border-orange bg-orange/10 px-4 py-3">
           <strong className="font-semibold">{examples} producten hebben nog een voorbeeldprijs.</strong> Tik erop en vul je eigen inkoopprijs in.
         </p>
       )}
 
       {materials.length === 0 ? (
-        <section className="flex flex-col items-center rounded-2xl bg-surface px-6 py-10 text-center">
-          <span className="mb-4 flex size-16 items-center justify-center rounded-[18px] bg-[#5856d6]/15 text-[#5856d6]">
+        <section className="flex flex-col items-center rounded-card border border-separator bg-surface px-6 py-10 text-center">
+          <span className="mb-4 flex size-16 items-center justify-center rounded-card bg-tint-soft text-tint">
             <BucketIcon className="size-8" />
           </span>
           <h2 className="text-title-2">Nog geen materialen</h2>

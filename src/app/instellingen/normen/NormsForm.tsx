@@ -51,7 +51,7 @@ function NormRowInput({ normKey, state, current }: { normKey: NormKey; state: Fo
           defaultValue={shown(state, `${normKey}.value`, current ? numberToInput(Number(current.value)) : "")}
           placeholder="—"
           aria-invalid={error ? true : undefined}
-          className="text-body tabular w-24 rounded-[10px] bg-surface-2 px-3 py-1.5 text-right outline-none placeholder:text-label-3"
+          className="text-body tabular w-24 rounded-control border border-separator bg-surface-2 px-3 py-1.5 text-right outline-none placeholder:text-label-3 focus:border-tint"
         />
         {units.length === 1 ? (
           <>
@@ -63,7 +63,7 @@ function NormRowInput({ normKey, state, current }: { normKey: NormKey; state: Fo
             name={`${normKey}.unit`}
             defaultValue={shown(state, `${normKey}.unit`, current?.unit ?? units[0])}
             aria-label={`Eenheid voor ${NORM_LABELS[normKey]}`}
-            className="text-subhead min-w-0 flex-1 rounded-[10px] bg-surface-2 px-2 py-1.5 text-label-2 outline-none"
+            className="text-subhead min-w-0 flex-1 rounded-control border border-separator bg-surface-2 px-2 py-1.5 text-label-2 outline-none focus:border-tint"
           >
             {units.map((u) => (
               <option key={u} value={u}>

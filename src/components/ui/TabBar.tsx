@@ -16,7 +16,7 @@ export function TabBar() {
   if (pathname === "/login" || pathname.startsWith("/auth")) return null;
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-separator bg-bar pb-[env(safe-area-inset-bottom)] backdrop-blur-xl backdrop-saturate-150">
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-separator bg-bar pb-[env(safe-area-inset-bottom)]">
       <ul className="mx-auto flex h-[60px] max-w-2xl">
         {tabs.map(({ href, label, Icon }) => {
           const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -25,11 +25,11 @@ export function TabBar() {
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`flex h-full flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors ${
-                  active ? "text-tint" : "text-gray"
+                className={`relative flex h-full flex-col items-center justify-center gap-1 text-[11px] font-semibold tracking-wide transition-colors ${
+                  active ? "text-label before:absolute before:inset-x-6 before:top-0 before:h-[3px] before:bg-tint" : "text-gray"
                 }`}
               >
-                <Icon className="size-[26px]" />
+                <Icon className="size-6" />
                 {label}
               </Link>
             </li>

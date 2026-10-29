@@ -9,8 +9,8 @@ export function LoginForm({ linkError }: { linkError: boolean }) {
 
   if (state.status === "sent") {
     return (
-      <section className="rounded-2xl bg-surface px-6 py-10 text-center">
-        <span className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-green/15 text-3xl" aria-hidden>
+      <section className="rounded-card border border-separator bg-surface px-6 py-10 text-center">
+        <span className="mx-auto mb-4 flex size-16 items-center justify-center rounded-card bg-green/10 text-3xl" aria-hidden>
           ✉️
         </span>
         <h2 className="text-title-2">Check je mail</h2>
@@ -24,9 +24,9 @@ export function LoginForm({ linkError }: { linkError: boolean }) {
   return (
     <form action={action} className="flex flex-col gap-4">
       {linkError && (
-        <p className="text-subhead rounded-2xl bg-red/12 px-4 py-3">Deze inloglink werkt niet meer. Vraag hieronder een nieuwe aan.</p>
+        <p className="text-subhead rounded-card border-l-[3px] border-red bg-red/10 px-4 py-3">Deze inloglink werkt niet meer. Vraag hieronder een nieuwe aan.</p>
       )}
-      <div className="rounded-2xl bg-surface px-4 py-3">
+      <div className="rounded-card border border-separator bg-surface px-4 py-3 focus-within:border-tint">
         <label htmlFor="email" className="text-subhead mb-1 block text-label-2">
           E-mailadres
         </label>

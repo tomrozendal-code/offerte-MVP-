@@ -74,7 +74,7 @@ export function TextArea({ label, name, error, hint, ...props }: TextAreaProps) 
         id={id}
         name={name}
         rows={5}
-        className="text-body w-full resize-y rounded-[10px] bg-surface-2 px-3 py-2 outline-none placeholder:text-label-3"
+        className="text-body w-full resize-y rounded-control border border-separator bg-surface-2 px-3 py-2 outline-none placeholder:text-label-3 focus:border-tint"
         {...props}
       />
       {hint && !error && <p className="text-footnote mt-1 text-label-2">{hint}</p>}
@@ -108,7 +108,7 @@ export function Select({ label, name, options, error, ...props }: SelectProps) {
 
 type ToggleProps = { label: string; name: string; defaultChecked?: boolean; hint?: ReactNode };
 
-/** iOS-style switch. Submits "on" when switched on. */
+/** On/off switch. Submits "on" when switched on. */
 export function Toggle({ label, name, defaultChecked, hint }: ToggleProps) {
   const id = `f-${name}`;
   return (
@@ -116,7 +116,7 @@ export function Toggle({ label, name, defaultChecked, hint }: ToggleProps) {
       <label htmlFor={id} className="flex min-h-[32px] cursor-pointer items-center gap-3">
         <span className="text-body flex-1">{label}</span>
         <input id={id} name={name} type="checkbox" defaultChecked={defaultChecked} className="peer sr-only" />
-        <span className="relative h-[31px] w-[51px] shrink-0 rounded-full bg-fill transition-colors peer-checked:bg-green peer-focus-visible:ring-2 peer-focus-visible:ring-tint after:absolute after:left-[2px] after:top-[2px] after:size-[27px] after:rounded-full after:bg-white after:shadow-[0_3px_8px_rgba(0,0,0,0.15),0_1px_1px_rgba(0,0,0,0.16)] after:transition-transform peer-checked:after:translate-x-[20px]" />
+        <span className="relative h-[28px] w-[48px] shrink-0 rounded-full border border-label/25 bg-surface-2 transition-colors peer-checked:border-tint peer-checked:bg-tint peer-focus-visible:ring-2 peer-focus-visible:ring-tint peer-focus-visible:ring-offset-2 after:absolute after:left-[3px] after:top-[3px] after:size-[20px] after:rounded-full after:bg-label/50 after:transition-transform peer-checked:after:translate-x-[20px] peer-checked:after:bg-white" />
       </label>
       {hint && <p className="text-footnote mt-1 text-label-2">{hint}</p>}
     </div>
@@ -125,19 +125,19 @@ export function Toggle({ label, name, defaultChecked, hint }: ToggleProps) {
 
 type ChoiceProps = { name: string; value: string; label: string; description?: ReactNode; defaultChecked?: boolean };
 
-/** One option of a single choice list, with a checkmark like iOS. */
+/** One option of a single choice list, with a radio dot. */
 export function Choice({ name, value, label, description, defaultChecked }: ChoiceProps) {
   const id = `f-${name}-${value}`;
   return (
-    <label data-separator htmlFor={id} className="flex cursor-pointer items-start gap-3 border-b border-separator px-4 py-3 active:bg-fill">
+    <label data-separator htmlFor={id} className="flex cursor-pointer items-start gap-3 border-b border-separator px-4 py-3.5 active:bg-fill has-[:checked]:bg-tint-soft">
       <input id={id} type="radio" name={name} value={value} defaultChecked={defaultChecked} className="peer sr-only" />
+      <span className="mt-[3px] flex size-[18px] shrink-0 items-center justify-center rounded-full border-2 border-label/30 peer-checked:border-tint peer-checked:[&>span]:scale-100 peer-focus-visible:ring-2 peer-focus-visible:ring-tint">
+        <span className="size-2 scale-0 rounded-full bg-tint transition-transform" />
+      </span>
       <span className="flex-1">
         <span className="text-body block">{label}</span>
         {description && <span className="text-subhead mt-0.5 block text-label-2">{description}</span>}
       </span>
-      <svg viewBox="0 0 24 24" className="mt-0.5 size-5 shrink-0 text-tint opacity-0 peer-checked:opacity-100" aria-hidden>
-        <path d="M5 12.5l4.5 4.5L19 7" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
     </label>
   );
 }
@@ -166,7 +166,7 @@ export function FormMessage({ state }: { state: FormState }) {
   if (state.status === "idle") return null;
   const saved = state.status === "saved";
   return (
-    <div role="status" className={`text-subhead rounded-2xl px-4 py-3 ${saved ? "bg-green/15 text-label" : "bg-red/12 text-label"}`}>
+    <div role="status" className={`text-subhead rounded-card border-l-[3px] px-4 py-3 ${saved ? "border-green bg-green/10 text-label" : "border-red bg-red/10 text-label"}`}>
       <strong className={`font-semibold ${saved ? "text-green" : "text-red"}`}>{saved ? "Opgeslagen." : "Niet opgeslagen."}</strong>{" "}
       {state.message ?? (saved ? "" : "Controleer de rode velden.")}
     </div>

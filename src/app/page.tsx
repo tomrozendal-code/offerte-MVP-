@@ -16,13 +16,13 @@ export default function QuotesPage() {
       }
     >
       {!isSupabaseConfigured() && (
-        <div className="text-subhead rounded-2xl bg-orange/12 px-4 py-3 text-label">
+        <div className="text-subhead rounded-card border-l-[3px] border-orange bg-orange/10 px-4 py-3 text-label">
           <strong className="font-semibold">Database nog niet gekoppeld.</strong> De app werkt, maar slaat nog niets op. Zie de README.
         </div>
       )}
 
-      <section className="flex flex-col items-center rounded-2xl bg-surface px-6 py-12 text-center">
-        <span className="mb-4 flex size-16 items-center justify-center rounded-[18px] bg-tint-soft text-tint">
+      <section className="flex flex-col items-center rounded-card border border-separator bg-surface px-6 py-12 text-center">
+        <span className="mb-4 flex size-16 items-center justify-center rounded-card bg-tint-soft text-tint">
           <DocIcon className="size-8" />
         </span>
         <h2 className="text-title-2">Nog geen offertes</h2>

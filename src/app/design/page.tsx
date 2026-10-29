@@ -44,7 +44,7 @@ export default function DesignPage() {
             <span className="text-body">Muren sauzen, 2 lagen</span>
             <span className="text-body tabular font-semibold">{formatEuro(21600)}</span>
           </div>
-          <p className="text-footnote tabular mt-1 rounded-lg bg-surface-2 px-2.5 py-1.5 text-label-2">
+          <p className="text-footnote tabular mt-1.5 border-l-2 border-tint bg-tint-soft px-2.5 py-1.5 text-label-2">
             43,2 m² × 2 lagen ÷ 18 m²/uur = 4,8 uur × € 45
           </p>
         </div>
