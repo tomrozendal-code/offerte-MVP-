@@ -11,7 +11,7 @@ De belangrijkste afspraak: **de AI rekent nooit.** De AI begrijpt wat de schilde
 | Fase | Wat | Status |
 | --- | --- | --- |
 | 0 | Opzet: project, database, design, README | ✅ Klaar |
-| 1 | Rekenmodule met tests | ⏳ |
+| 1 | Rekenmodule met tests | ✅ Klaar |
 | 2 | Instellingen (bedrijf, tarieven, normen, materialen) | ⏳ |
 | 3 | AI-verwerking (tekst, daarna spraak) | ⏳ |
 | 4 | Controleren en pdf | ⏳ |
@@ -70,7 +70,7 @@ src/
     design/         Overzicht van alle design-onderdelen
   components/ui/    Herbruikbare bouwstenen: knoppen, lijsten, tabbalk
   lib/
-    calc/           De rekenmodule (fase 1)
+    calc/           De rekenmodule: alle berekeningen en btw (zie de README daar)
     ai/             AI-verwerking, alleen op de server (fase 3)
     supabase/       Verbinding met de database
     format.ts       Bedragen en getallen netjes in het Nederlands tonen
