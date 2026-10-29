@@ -12,7 +12,7 @@ De belangrijkste afspraak: **de AI rekent nooit.** De AI begrijpt wat de schilde
 | --- | --- | --- |
 | 0 | Opzet: project, database (ook opvolging en meten), design, README | ✅ Klaar |
 | 1 | Rekenmodule en herinneringsplanning met tests | ✅ Klaar |
-| 2 | Instellingen (bedrijf, tarieven, normen, materialen, opvolging) | ✅ Gebouwd (nog live testen met Supabase) |
+| 2 | Instellingen (bedrijf, tarieven, normen, materialen, opvolging) | ✅ Klaar en live getest |
 | 3 | AI-verwerking (tekst, spraak, werkomschrijving) | ⏳ |
 | 4 | Controleren en pdf | ⏳ |
 | 5 | Delen, bekijk-melding, akkoord of afwijzen | ⏳ |
