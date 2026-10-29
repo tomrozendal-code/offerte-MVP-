@@ -62,7 +62,8 @@ Intern rekent alles met exacte breuken (`fraction.ts`), dus er ontstaan geen kom
   al had gemoeten, zodat de klant nooit twee tegelijk krijgt.
 - `decideViewNotification` beslist of de vakman een melding krijgt als de offerte bekeken wordt: bij de
   eerste keer, en daarna alleen als er langer dan 24 uur niet gekeken is. De vakman zelf telt niet mee.
-- "Dag 3" betekent precies 3 × 24 uur na het versturen.
+- "Dag 3" betekent: drie kalenderdagen na het versturen, om 9:00 Nederlandse tijd (instelbaar).
+  Verstuurd op maandag 16:30 → herinnering op donderdag 9:00. Zomer- en wintertijd gaan vanzelf goed.
 
 ## Bekende beperkingen (later oppakken)
 

@@ -30,6 +30,8 @@ alter table public.profiles
   add column reminders_enabled boolean not null default true,
   add column reminder_days integer[] not null default '{3,7}'
     check (cardinality(reminder_days) between 1 and 2 and 1 <= all (reminder_days) and 60 >= all (reminder_days)),
+  -- Hour (Dutch time) at which reminders go out.
+  add column reminder_hour integer not null default 9 check (reminder_hour between 7 and 20),
   -- null = use the standard text.
   add column reminder_text text;
 

@@ -1,15 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { decideViewNotification, planReminder, type ReminderQuoteState, type ReminderSettings } from "./followUp";
+import { decideViewNotification, planReminder, reminderDueAt, type ReminderQuoteState, type ReminderSettings } from "./followUp";
 
 const DAY = 24 * 60 * 60 * 1000;
-const sentAt = new Date("2026-11-02T09:00:00Z"); // day 0
-const day = (n: number, time = "09:00") => new Date(sentAt.getTime() + n * DAY + (timeToMs(time) - timeToMs("09:00")));
+// Day 0: Monday 2 November 2026, 16:30 Dutch time (winter time, UTC+1).
+const sentAt = new Date("2026-11-02T15:30:00Z");
+/** Day n at 09:00 Dutch time (winter time). */
+const at9 = (n: number) => new Date(Date.UTC(2026, 10, 2 + n, 8, 0));
+/** Day n after sending, at the given Dutch (winter) time. */
+const day = (n: number, time = "16:30") => new Date(Date.UTC(2026, 10, 2 + n) + timeToMs(time) - 60 * 60 * 1000);
 function timeToMs(t: string) {
   const [h, m] = t.split(":").map(Number);
   return (h * 60 + m) * 60 * 1000;
 }
 
-const settings: ReminderSettings = { enabled: true, days: [3, 7] };
+const settings: ReminderSettings = { enabled: true, days: [3, 7], hour: 9 };
 
 const quote = (overrides: Partial<ReminderQuoteState> = {}): ReminderQuoteState => ({
   status: "sent",
@@ -24,15 +28,15 @@ const quote = (overrides: Partial<ReminderQuoteState> = {}): ReminderQuoteState 
   ...overrides,
 });
 
-/** Simulates the cron job every 15 minutes and returns the days on which reminders were sent. */
+/** Simulates the cron job every 15 minutes and returns the moments reminders were sent. */
 function simulate(q: ReminderQuoteState, s: ReminderSettings, untilDay: number, onDay?: (d: number, q: ReminderQuoteState) => void) {
-  const sentOn: number[] = [];
+  const sentOn: Date[] = [];
   for (let t = sentAt.getTime(); t <= day(untilDay).getTime(); t += 15 * 60 * 1000) {
     const now = new Date(t);
     onDay?.((t - sentAt.getTime()) / DAY, q);
     const d = planReminder(q, s, now);
     if (d.action === "send") {
-      sentOn.push((t - sentAt.getTime()) / DAY);
+      sentOn.push(now);
       q.sentReminders = [...q.sentReminders, d.reminderIndex];
       q.status = "reminded";
     }
@@ -41,15 +45,15 @@ function simulate(q: ReminderQuoteState, s: ReminderSettings, untilDay: number, 
 }
 
 describe("test case 6: reminders on day 3 and day 7", () => {
-  it("sends on day 3 and day 7, then nothing", () => {
-    expect(simulate(quote(), settings, 30)).toEqual([3, 7]);
+  it("sends on day 3 and day 7 at 09:00, then nothing", () => {
+    expect(simulate(quote(), settings, 30)).toEqual([at9(3), at9(7)]);
   });
 
   it("drops the day-7 reminder after acceptance on day 4", () => {
     const sent = simulate(quote(), settings, 30, (d, q) => {
       if (d >= 4) q.status = "accepted";
     });
-    expect(sent).toEqual([3]);
+    expect(sent).toEqual([at9(3)]);
   });
 
   it("stops when the client rejects or the painter marks won/lost", () => {
@@ -59,12 +63,13 @@ describe("test case 6: reminders on day 3 and day 7", () => {
   });
 
   it("shows when the next reminder is planned", () => {
-    expect(planReminder(quote(), settings, day(1))).toEqual({ action: "wait", reminderIndex: 0, dueAt: day(3) });
-    expect(planReminder(quote({ sentReminders: [0] }), settings, day(4))).toEqual({ action: "wait", reminderIndex: 1, dueAt: day(7) });
+    expect(planReminder(quote(), settings, day(1))).toEqual({ action: "wait", reminderIndex: 0, dueAt: at9(3) });
+    expect(planReminder(quote({ sentReminders: [0] }), settings, day(4))).toEqual({ action: "wait", reminderIndex: 1, dueAt: at9(7) });
   });
 
   it("never sends the same reminder twice", () => {
     expect(planReminder(quote({ sentReminders: [0] }), settings, day(3, "09:15")).action).toBe("wait");
+    expect(planReminder(quote(), settings, day(3, "08:59")).action).toBe("wait");
     expect(planReminder(quote({ sentReminders: [0, 1] }), settings, day(8))).toEqual({ action: "none", reason: "all_done" });
   });
 
@@ -74,13 +79,39 @@ describe("test case 6: reminders on day 3 and day 7", () => {
   });
 
   it("uses at most two reminders", () => {
-    expect(simulate(quote(), { enabled: true, days: [1, 2, 3] }, 30)).toEqual([1, 2]);
+    expect(simulate(quote(), { ...settings, days: [1, 2, 3] }, 30)).toEqual([at9(1), at9(2)]);
+  });
+});
+
+describe("reminder time: 09:00 Dutch time", () => {
+  it("handles winter time (UTC+1)", () => {
+    expect(reminderDueAt(new Date("2026-11-02T15:30:00Z"), 3, 9).toISOString()).toBe("2026-11-05T08:00:00.000Z");
+  });
+
+  it("handles summer time (UTC+2)", () => {
+    expect(reminderDueAt(new Date("2026-06-01T10:00:00Z"), 3, 9).toISOString()).toBe("2026-06-04T07:00:00.000Z");
+  });
+
+  it("handles the switch to summer time in between", () => {
+    // Sent Friday 27 March 2026 (winter time); summer time starts Sunday 29 March.
+    expect(reminderDueAt(new Date("2026-03-27T12:00:00Z"), 3, 9).toISOString()).toBe("2026-03-30T07:00:00.000Z");
+  });
+
+  it("counts calendar days in Dutch time, also late in the evening", () => {
+    // 23:30 Dutch time on 2 November is 22:30 UTC; day 3 is still 5 November.
+    expect(reminderDueAt(new Date("2026-11-02T22:30:00Z"), 3, 9).toISOString()).toBe("2026-11-05T08:00:00.000Z");
+    // 00:30 Dutch time on 3 November is still 2 November in UTC; day 3 is 6 November.
+    expect(reminderDueAt(new Date("2026-11-02T23:30:00Z"), 3, 9).toISOString()).toBe("2026-11-06T08:00:00.000Z");
+  });
+
+  it("crosses month and year boundaries", () => {
+    expect(reminderDueAt(new Date("2026-12-30T12:00:00Z"), 7, 9).toISOString()).toBe("2027-01-06T08:00:00.000Z");
   });
 });
 
 describe("test case 7: valid for 5 days", () => {
   it("sends on day 3 but not on day 7", () => {
-    expect(simulate(quote({ expiresAt: day(5) }), settings, 30)).toEqual([3]);
+    expect(simulate(quote({ expiresAt: day(5) }), settings, 30)).toEqual([at9(3)]);
     expect(planReminder(quote({ expiresAt: day(5), sentReminders: [0] }), settings, day(4))).toEqual({
       action: "none",
       reason: "next_after_expiry",
@@ -103,8 +134,8 @@ describe("test case 8: reminders switched off", () => {
   });
 
   it("skips only the reminder the painter skipped", () => {
-    expect(simulate(quote({ skippedReminders: [0] }), settings, 30)).toEqual([7]);
-    expect(simulate(quote({ skippedReminders: [1] }), settings, 30)).toEqual([3]);
+    expect(simulate(quote({ skippedReminders: [0] }), settings, 30)).toEqual([at9(7)]);
+    expect(simulate(quote({ skippedReminders: [1] }), settings, 30)).toEqual([at9(3)]);
     expect(simulate(quote({ skippedReminders: [0, 1] }), settings, 30)).toEqual([]);
   });
 });

@@ -3,6 +3,7 @@
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_REMINDERS = 2;
+const TIME_ZONE = "Europe/Amsterdam";
 
 export type QuoteFollowUpStatus = "draft" | "sent" | "viewed" | "reminded" | "accepted" | "rejected" | "expired";
 
@@ -10,6 +11,8 @@ export type ReminderSettings = {
   enabled: boolean;
   /** Days after sending, e.g. [3, 7]. At most two are used. */
   days: number[];
+  /** Hour of the day (Dutch time) at which reminders go out, e.g. 9 for 09:00. */
+  hour: number;
 };
 
 export type ReminderQuoteState = {
@@ -60,7 +63,7 @@ export function planReminder(quote: ReminderQuoteState, settings: ReminderSettin
   // Reminders before the last sent one are never sent anymore (they were passed over after downtime).
   const lastSent = Math.max(-1, ...quote.sentReminders);
   const open = days
-    .map((d, index) => ({ index, dueAt: new Date(quote.sentAt!.getTime() + d * DAY_MS) }))
+    .map((d, index) => ({ index, dueAt: reminderDueAt(quote.sentAt!, d, settings.hour) }))
     .filter((r) => r.index > lastSent && !quote.skippedReminders.includes(r.index));
 
   if (open.length === 0) return { action: "none", reason: "all_done" };
@@ -73,6 +76,46 @@ export function planReminder(quote: ReminderQuoteState, settings: ReminderSettin
   const channel: ReminderChannel | null = quote.clientEmail ? "email" : quote.clientPhone ? "whatsapp_prompt" : null;
   if (channel === null) return { action: "none", reason: "no_contact" };
   return { action: "send", reminderIndex: next.index, dueAt: next.dueAt, channel };
+}
+
+/**
+ * Day `days` after sending, at `hour`:00 Dutch time (summer and winter time handled).
+ * Example: sent on Monday 16:30, days = 3, hour = 9 → Thursday 09:00.
+ */
+export function reminderDueAt(sentAt: Date, days: number, hour: number): Date {
+  const { year, month, day } = zonedParts(sentAt);
+  return zonedTimeToUtc(year, month, day + days, hour);
+}
+
+// Creating a formatter is slow; create it once.
+const dutchTime = new Intl.DateTimeFormat("en-US", {
+  timeZone: TIME_ZONE,
+  hourCycle: "h23",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+});
+
+function zonedParts(date: Date) {
+  const parts = dutchTime.formatToParts(date);
+  const get = (type: string) => Number(parts.find((p) => p.type === type)!.value);
+  return { year: get("year"), month: get("month"), day: get("day"), hour: get("hour"), minute: get("minute"), second: get("second") };
+}
+
+/** Offset of Dutch time from UTC at a moment, in milliseconds (1 or 2 hours). */
+function offsetMs(date: Date): number {
+  const p = zonedParts(date);
+  return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) - Math.floor(date.getTime() / 1000) * 1000;
+}
+
+function zonedTimeToUtc(year: number, month: number, day: number, hour: number): Date {
+  // Date.UTC handles day overflow (e.g. 33 November → 3 December).
+  const asIfUtc = Date.UTC(year, month - 1, day, hour);
+  const guess = asIfUtc - offsetMs(new Date(asIfUtc));
+  return new Date(asIfUtc - offsetMs(new Date(guess)));
 }
 
 export type ViewDecision = {
