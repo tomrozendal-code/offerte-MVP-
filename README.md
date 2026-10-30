@@ -14,7 +14,7 @@ De belangrijkste afspraak: **de AI rekent nooit.** De AI begrijpt wat de schilde
 | 1 | Rekenmodule en herinneringsplanning met tests | ✅ Klaar |
 | 2 | Instellingen (bedrijf, tarieven, normen, materialen, opvolging) | ✅ Klaar en live getest |
 | 3 | AI-verwerking (tekst, spraak, werkomschrijving) | 🟡 Tekst en werkomschrijving gebouwd; evals draaien zodra de AI-sleutel er is; spraak volgt |
-| 4 | Controleren en pdf | ⏳ |
+| 4 | Controleren en pdf | 🟡 Gebouwd; live test volgt |
 | 5 | Delen, bekijk-melding, akkoord of afwijzen | ⏳ |
 | 6 | Opvolging en meten: herinneringen, dashboard | ⏳ |
 | 7 | Afronden (PWA, beveiliging, privacy) | ⏳ |
@@ -67,7 +67,8 @@ Supabase is de database, de login en de opslag voor bestanden. Je hebt het pas e
 src/
   app/              De schermen (elke map is een pagina)
     page.tsx        Offertes (startscherm)
-    nieuw/          Nieuwe offerte (inspreken komt in fase 3)
+    nieuw/          Nieuwe offerte: klus beschrijven en laten verwerken
+    offertes/[id]/  Offerte controleren en aanpassen; /pdf geeft de pdf
     login/          Inloggen met een link in je mail (geen wachtwoord)
     auth/confirm/   Hier komt de link uit de mail binnen
     instellingen/   Instellingen: bedrijf, tarieven, normen, materialen, btw, opvolging
@@ -76,6 +77,8 @@ src/
   lib/
     calc/           De rekenmodule: alle berekeningen en btw (zie de README daar)
     ai/             AI-verwerking, alleen op de server: vast formaat, werkomschrijving, controles
+    quotes/         Offertes opslaan, laden en elke aanpassing vastleggen
+    pdf/            De pdf van de offerte
     settings/       Instellingen controleren en omzetten (bijv. "€ 45,50" → 4550 cent)
     auth/           Wie is er ingelogd?
     supabase/       Verbinding met de database
@@ -98,5 +101,7 @@ evals/              Testvoorbeelden voor de AI (fase 3)
 - **Bekijken meten zonder tracking.** We zien alleen dat iemand onze eigen offertepagina opent. Geen trackingpixels in e-mails, geen cookies van anderen, geen IP-adressen.
 - **De AI rekent nooit.** Claude zet wat je zegt om in een vast formaat (bijvoorbeeld "lengte 4, breedte 5, hoogte ontbreekt"). Wat je niet zegt, blijft leeg; de app vraagt er later naar. Daarna rekent de app zelf, met jouw instellingen.
 - **Werkomschrijving met controle.** De AI schrijft per ruimte een korte tekst. De app controleert die tekst: staat er een bedrag, uren, een belofte of een getal in dat niet in de gegevens staat, dan wordt een eenvoudige standaardtekst gebruikt.
+- **Alles aanpasbaar, alles vastgelegd.** In het bewerkscherm vul je ontbrekende maten in, beantwoord je de btw-vragen, pas je bedragen aan of voeg je eigen regels toe. Een aangepast bedrag houdt zijn uitleg ("Handmatig aangepast naar € 200,00, berekend: € 216,00"). Elke wijziging ten opzichte van het voorstel van de AI wordt bewaard (tabel `quote_edits`), zodat je later je normen kunt verbeteren.
+- **Demo-modus.** Zet `AI_PROVIDER=demo` in `.env.local` om zonder AI-sleutel te testen. De app gebruikt dan altijd hetzelfde voorbeeld en zegt dat duidelijk. Werkt nooit in productie.
 - **AI-kosten en limiet.** Elke AI-aanroep wordt met kosten opgeslagen (tabel `ai_calls`). Per gebruiker zijn er maximaal `AI_CALLS_PER_USER_PER_DAY` aanroepen per 24 uur (standaard 50).
 - **Btw-tarieven staan in de database** (tabel `vat_rates`), niet in de code. Verandert de wet, dan pas je alleen die tabel aan.

@@ -10,7 +10,8 @@ Dit bestand houdt bij waar we zijn, zodat een nieuwe sessie direct verder kan. L
 | 1 – Rekenmodule en herinneringsplanning | Klaar (tests slagen) |
 | 2 – Inloggen en instellingen | Klaar en live getest op het echte Supabase-project |
 | 3 – AI-verwerking | Tekstinvoer, werkomschrijving, evals (11 cases) en scherm gebouwd. Nog te doen: evals draaien met echte sleutel, migratie 0006 uitvoeren, spraak (dienst kiezen) |
-| 4 t/m 7 | Nog niet begonnen |
+| 4 – Controleren en pdf | Gebouwd (opslaan, bewerkscherm, eigen regels/bedragen, wijzigingen vastleggen, overzicht, pdf). Migratie 0007 uitvoeren en live testen |
+| 5 t/m 7 | Nog niet begonnen |
 
 ## Supabase
 
@@ -49,6 +50,13 @@ Na de test: "Confirm email" weer aanzetten en de testgebruikers `test-a.offerte-
 - `npm run evals` draait 11 cases en de werkomschrijving-check. In de cloudcontainer: `NODE_USE_ENV_PROXY=1 npm run evals`.
 - Nog niet gedaan: offerte opslaan (fase 4), ontbrekende gegevens in de app aanvullen (fase 4), spraak-naar-tekst (eerst dienst kiezen met Tom, CLAUDE.md regel 9).
 
+## Fase 4: stand van zaken
+
+- Migratie `20261030000007_quote_draft.sql` moet nog in Supabase uitgevoerd worden (na 0006).
+- Testen zonder AI-sleutel: `AI_PROVIDER=demo` in `.env.local` (alleen buiten productie).
+- Pdf: `@react-pdf/renderer`; paginanummer in de voettekst werkt niet in deze versie (render-prop), daarom alleen bedrijfsnaam en nummer.
+- Nog niet: logo (upload komt met Storage), offerte versturen/delen (fase 5).
+
 ## Afspraken met Tom
 
 - Uitleg in eenvoudig Nederlands, kort per keuze.
@@ -57,3 +65,4 @@ Na de test: "Confirm email" weer aanzetten en de testgebruikers `test-a.offerte-
 - Design: zakelijke stijl (geïnspireerd op grote adviesbureaus), geen Apple-look.
 - Tom heeft later nog eigen aanpassingen; keuzes staan in `src/lib/calc/README.md`.
 - Push naar `main` op `tomrozendal-code/offerte-MVP-`.
+- De Anthropic API-sleutel voegt Tom als allerlaatste toe; tot die tijd testen we met de demo-modus.

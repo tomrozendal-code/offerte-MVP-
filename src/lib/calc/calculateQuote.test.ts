@@ -295,3 +295,47 @@ describe("VAT rates come from configuration", () => {
     expect(r.missingSettings.map((s) => s.key)).toEqual(["vatRate:reduced"]);
   });
 });
+
+describe("the painter's own changes", () => {
+  const base = calc(livingRoom);
+  const wallsKey = "Woonkamer|labor|Muren sauzen, 2 lagen (standaard)";
+
+  it("overrides an amount and keeps it traceable", async () => {
+    const { lineKey } = await import("./calculateQuote");
+    expect(lineKey(base.lines[0])).toBe(wallsKey);
+    const r = calculateQuote({ job: livingRoom, settings: exampleSettings, vat: oldHome, vatConfig, quoteDate: QUOTE_DATE, adjustments: { overrides: { [wallsKey]: 20000 } } });
+    expect(r.lines[0].amountCents).toBe(20000);
+    expect(r.lines[0].calculatedAmountCents).toBe(21600);
+    expect(r.lines[0].explanation.at(-1)).toBe("Handmatig aangepast naar € 200,00 (berekend: € 216,00)");
+    expect(r.subtotalCents).toBe(74620 - 1600);
+    expect(r.vat).toEqual([{ rateBp: 900, baseCents: 73020, vatCents: 6572 }]);
+  });
+
+  it("adds extra lines with their own VAT category", () => {
+    const r = calculateQuote({
+      job: livingRoom,
+      settings: { ...exampleSettings, materialVatMode: "always_standard" },
+      vat: oldHome,
+      vatConfig,
+      quoteDate: QUOTE_DATE,
+      adjustments: { extraLines: [{ room: "Gang", description: "Behang verwijderen", amountCents: 15000, vatCategory: "labor" }, { room: null, description: "Afdekmateriaal", amountCents: 2000, vatCategory: "material" }] },
+    });
+    const extra = r.lines.filter((l) => l.kind === "other");
+    expect(extra.map((l) => l.explanation[0])).toEqual(["Zelf toegevoegd: € 150,00", "Zelf toegevoegd: € 20,00"]);
+    expect(r.subtotalCents).toBe(74620 + 17000);
+    expect(r.vat).toEqual([
+      { rateBp: 900, baseCents: 60820 + 15000, vatCents: 6824 },
+      { rateBp: 2100, baseCents: 13800 + 2000, vatCents: 3318 },
+    ]);
+  });
+
+  it("ignores an override that equals the calculated amount", () => {
+    const r = calculateQuote({ job: livingRoom, settings: exampleSettings, vat: oldHome, vatConfig, quoteDate: QUOTE_DATE, adjustments: { overrides: { [wallsKey]: 21600 } } });
+    expect(r.lines[0].calculatedAmountCents).toBeUndefined();
+  });
+
+  it("applies the minimum amount after the changes", () => {
+    const r = calculateQuote({ job: livingRoom, settings: { ...exampleSettings, minimumAmountCents: 80000 }, vat: oldHome, vatConfig, quoteDate: QUOTE_DATE, adjustments: { overrides: { [wallsKey]: 0 } } });
+    expect(r.lines.find((l) => l.kind === "minimum_charge")?.amountCents).toBe(80000 - (74620 - 21600));
+  });
+});

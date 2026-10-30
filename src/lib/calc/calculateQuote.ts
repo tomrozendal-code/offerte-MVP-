@@ -6,6 +6,7 @@ import { type Fraction, add, ceil, div, frac, fromDecimal, mul, roundHalfUp } fr
 import { NORM_LABELS, UNIT_LABELS } from "./norms";
 import { laborVatParts, materialVatParts, missingVatRates, vatBreakdown, type VatPart } from "./vat";
 import type {
+  Adjustments,
   CalcLine,
   CalcSettings,
   CeilingItem,
@@ -32,7 +33,13 @@ export type CalculateQuoteInput = {
   vatConfig: VatConfig;
   /** ISO date (yyyy-mm-dd) of the quote; determines which VAT rates apply. */
   quoteDate: string;
+  adjustments?: Adjustments;
 };
+
+/** Stable key of a calculated line, used to store the painter's override for it. */
+export function lineKey(line: Pick<CalcLine, "room" | "kind" | "description">): string {
+  return `${line.room ?? ""}|${line.kind}|${line.description}`;
+}
 
 type MaterialUse = { label: string; area: Fraction; coats: number };
 
@@ -40,7 +47,7 @@ type MaterialUse = { label: string; area: Fraction; coats: number };
  * Calculates a complete quote from the structured job description and the painter's own settings.
  * Pure function: no database, no AI, no UI. Missing data is reported, never guessed.
  */
-export function calculateQuote({ job, settings, vat, vatConfig, quoteDate }: CalculateQuoteInput): QuoteCalculation {
+export function calculateQuote({ job, settings, vat, vatConfig, quoteDate, adjustments }: CalculateQuoteInput): QuoteCalculation {
   const lines: CalcLine[] = [];
   const missingInfo: MissingInfo[] = [];
   const missingSettings = new Map<string, MissingSetting>();
@@ -308,6 +315,29 @@ export function calculateQuote({ job, settings, vat, vatConfig, quoteDate }: Cal
       amountCents: settings.travelCostCents,
       vatCategory: "labor",
       explanation: [`Vast bedrag uit je instellingen: ${euro(settings.travelCostCents)}`],
+    });
+  }
+
+  // The painter's own changes, applied before the minimum amount and VAT.
+  for (const line of lines) {
+    const override = adjustments?.overrides?.[lineKey(line)];
+    if (override === undefined || override === line.amountCents) continue;
+    if (!Number.isInteger(override) || override < 0) throw new Error(`Override must be a non-negative integer of cents, got ${override}`);
+    line.calculatedAmountCents = line.amountCents;
+    line.explanation = [...line.explanation, `Handmatig aangepast naar ${euro(override)} (berekend: ${euro(line.amountCents)})`];
+    line.amountCents = override;
+  }
+  for (const extra of adjustments?.extraLines ?? []) {
+    if (!Number.isInteger(extra.amountCents)) throw new Error(`Extra line amount must be integer cents, got ${extra.amountCents}`);
+    lines.push({
+      room: extra.room,
+      kind: "other",
+      description: extra.description,
+      quantity: 1,
+      unit: "post",
+      amountCents: extra.amountCents,
+      vatCategory: extra.vatCategory,
+      explanation: [`Zelf toegevoegd: ${euro(extra.amountCents)}`],
     });
   }
 

@@ -105,7 +105,16 @@ export type VatRate = { code: "reduced" | "standard"; rateBp: number; validFrom:
 /** Comes from the database tables vat_rates and vat_rules, so law changes need no code change. */
 export type VatConfig = { rates: VatRate[]; mixedUseSplitFrom: string };
 
-export type LineKind = "labor" | "material" | "travel" | "minimum_charge";
+export type LineKind = "labor" | "material" | "travel" | "minimum_charge" | "other";
+
+/** A line the painter added by hand (CLAUDE.md rule 5: everything can be changed before sending). */
+export type ExtraLine = { room: string | null; description: string; amountCents: number; vatCategory: "labor" | "material" };
+
+/**
+ * The painter's own changes on top of the calculation. Overrides are keyed by `lineKey(line)`.
+ * Adjusted and added lines say so in their explanation, so every amount stays traceable.
+ */
+export type Adjustments = { overrides?: Record<string, number>; extraLines?: ExtraLine[] };
 
 export type CalcLine = {
   room: string | null;
@@ -118,6 +127,8 @@ export type CalcLine = {
   vatCategory: "labor" | "material";
   /** Human-readable calculation steps (CLAUDE.md rule 3). */
   explanation: string[];
+  /** Set when the painter changed the amount by hand: the amount the app had calculated. */
+  calculatedAmountCents?: number;
 };
 
 /**

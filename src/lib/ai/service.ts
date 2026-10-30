@@ -5,12 +5,13 @@ import { requireUser } from "@/lib/auth/user";
 import { loadMaterials, loadNorms, loadProfile } from "@/lib/settings/data";
 import { toCalcSettings } from "@/lib/settings/toCalcSettings";
 import { loadVatConfig } from "@/lib/settings/vatConfig";
-import { anthropicDescriber, anthropicStructurer } from "./anthropic";
+import { getProviders } from "./providers";
 import { checkDescription, factsText, roomFacts, templateDescription } from "./description";
 import { type Extraction, toJob, toVatContext } from "./extraction";
 import { AiError, type AiUsage } from "./types";
 
 export type AnalyzeResult = {
+  demo: boolean;
   extraction: Extraction;
   calculation: QuoteCalculation;
   description: string;
@@ -54,8 +55,9 @@ export async function analyzeJob(text: string, quoteDate: string): Promise<Analy
     });
   };
 
-  const { extraction, usage } = await anthropicStructurer.structure(input);
-  await log("structure", usage);
+  const { structurer, describer, demo } = getProviders();
+  const { extraction, usage } = await structurer.structure(input);
+  if (!demo) await log("structure", usage);
 
   const [profile, norms, materials, vatConfig] = await Promise.all([loadProfile(), loadNorms(), loadMaterials(), loadVatConfig()]);
   const settings = toCalcSettings(profile, norms, materials);
@@ -71,7 +73,8 @@ export async function analyzeJob(text: string, quoteDate: string): Promise<Analy
   if (rooms.length > 0) {
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
-        const result = await anthropicDescriber.describe(factsText(rooms));
+        const result = await describer.describe(factsText(rooms));
+        if (demo) break;
         await log("describe", result.usage);
         if (checkDescription(result.text, allowed, materialNames).ok) {
           description = result.text;
@@ -84,5 +87,5 @@ export async function analyzeJob(text: string, quoteDate: string): Promise<Analy
     }
   }
 
-  return { extraction, calculation, description, descriptionSource };
+  return { demo, extraction, calculation, description, descriptionSource };
 }
